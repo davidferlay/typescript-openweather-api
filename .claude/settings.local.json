@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Read(//home/dferlay/**)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(tee:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
