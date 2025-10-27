@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCachedWeather, setCachedWeather } from "./cache";
+import { getCachedWeather, setCachedWeather } from "./cache.js";
 
 export async function getWeather(city: string) {
   const cached = getCachedWeather(city);

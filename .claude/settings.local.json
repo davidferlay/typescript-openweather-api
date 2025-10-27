@@ -8,7 +8,10 @@
       "Bash(cat:*)",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(tsx watch:*)",
+      "Bash(npm run start)",
+      "Bash(timeout 3 npm run start:*)"
     ],
     "deny": [],
     "ask": []

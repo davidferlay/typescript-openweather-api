@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authMiddleware } from "../services/auth";
-import { getWeather } from "../services/weather";
+import { authMiddleware } from "../services/auth.js";
+import { getWeather } from "../services/weather.js";
 
 const router = Router();
 
