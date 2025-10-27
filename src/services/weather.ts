@@ -1,14 +1,18 @@
 import axios from "axios";
 import { getCachedWeather, setCachedWeather } from "./cache.js";
 import { config } from "../config.js";
+import { metrics } from "./metrics.js";
 
 export async function getWeather(city: string) {
   const cached = getCachedWeather(city);
   if (cached) {
     console.log(`Cache hit for city: ${city}`);
+    metrics.trackCacheHit();
     return { data: cached, fromCache: true };
   }
   console.log(`Fetching from API for city: ${city}`);
+  metrics.trackCacheMiss();
+
   const apiKey = process.env.OWM_API_KEY;
   if (!apiKey) {
     throw new Error("Missing required environment variable: OWM_API_KEY");

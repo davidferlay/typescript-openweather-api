@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { execSync } from "child_process";
 import { config } from "../config.js";
+import { metrics } from "../services/metrics.js";
 
 const router = Router();
 
@@ -22,6 +23,10 @@ router.get("/status", (req, res) => {
       commit: getGitCommitSha(),
     },
   });
+});
+
+router.get("/metrics", (req, res) => {
+  res.json(metrics.getMetrics());
 });
 
 export default router;
