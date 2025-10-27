@@ -10,8 +10,9 @@ router.get("/:city", authMiddleware, async (req, res) => {
     return res.status(400).json({ error: "City parameter is required" });
   }
   try {
-    const weatherData = await getWeather(city);
-    res.json(weatherData);
+    const { data, fromCache } = await getWeather(city);
+    res.setHeader("X-Cache-Status", fromCache ? "HIT" : "MISS");
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Weather fetch failed" });
   }

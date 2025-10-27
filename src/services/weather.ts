@@ -4,7 +4,11 @@ import { config } from "../config.js";
 
 export async function getWeather(city: string) {
   const cached = getCachedWeather(city);
-  if (cached) return cached;
+  if (cached) {
+    console.log(`Cache hit for city: ${city}`);
+    return { data: cached, fromCache: true };
+  }
+  console.log(`Fetching from API for city: ${city}`);
   const apiKey = process.env.OWM_API_KEY;
   if (!apiKey) {
     throw new Error("Missing required environment variable: OWM_API_KEY");
@@ -17,6 +21,6 @@ export async function getWeather(city: string) {
     temperature: response.data.main.temp,
   };
   setCachedWeather(city, weather);
-  return weather;
+  return { data: weather, fromCache: false };
 }
 
