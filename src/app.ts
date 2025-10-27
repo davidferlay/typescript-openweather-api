@@ -1,9 +1,7 @@
 import express from "express";
-import dotenv from "dotenv";
+import "./config.js"; // Load config/env vars
 import weatherRoutes from "./routes/weather.js";
 import authRoutes from "./routes/auth.js";
-
-dotenv.config();
 const app = express();
 app.use(express.json());
 

@@ -1,6 +1,7 @@
 import NodeCache from "node-cache";
+import { config } from "../config.js";
 
-const cache = new NodeCache({ stdTTL: 60 }); // 60s cache
+const cache = new NodeCache({ stdTTL: config.weather.cacheTTL });
 
 export function getCachedWeather(city: string) {
   return cache.get(city);
