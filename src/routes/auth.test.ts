@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { Request, Response } from 'express';
 
 describe('Auth Routes', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
+  const originalJwtSecret = process.env.JWT_SECRET;
 
   beforeEach(() => {
     mockRequest = { body: {} };
@@ -12,6 +13,12 @@ describe('Auth Routes', () => {
       json: jest.fn().mockReturnThis() as any,
     };
     jest.resetModules();
+    // Ensure JWT_SECRET is set for tests
+    process.env.JWT_SECRET = 'test-secret-key';
+  });
+
+  afterEach(() => {
+    process.env.JWT_SECRET = originalJwtSecret;
   });
 
   it('should return 400 when credentials are missing', async () => {

@@ -20,4 +20,12 @@ export default {
     '!src/**/*.d.ts',
     '!src/app.ts',
   ],
+  coverageThreshold: {
+    global: {
+      statements: 85,
+      branches: 60,
+      functions: 100,
+      lines: 80,
+    },
+  },
 };
