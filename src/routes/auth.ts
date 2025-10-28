@@ -1,9 +1,9 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { config } from "../config.js";
 import { logger } from "../services/logger.js";
 
-const router = Router();
+const router: Router = Router();
 
 // TODO: upgrade in favor of real /registration user workflow
 router.post("/get-token", (req, res) => {
@@ -26,15 +26,15 @@ router.post("/get-token", (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const secret = process.env.JWT_SECRET;
+  const secret: string | undefined = process.env["JWT_SECRET"];
   if (!secret) {
     logger.error("JWT_SECRET not configured");
     return res.status(500).json({ error: "Server configuration error" });
   }
-  const payload = { username };
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  const payload: JwtPayload = { username };
+  const token: string = jwt.sign(payload, secret, { expiresIn: "1h" });
   logger.info("User authenticated successfully", { username });
-  res.json({ token });
+  return res.json({ token });
 });
 
 export default router;

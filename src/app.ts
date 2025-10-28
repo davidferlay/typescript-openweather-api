@@ -5,7 +5,7 @@ import authRoutes from "./routes/auth.js";
 import statusRoutes from "./routes/status.js";
 import { metricsMiddleware } from "./services/metrics.js";
 
-const app = express();
+const app: express.Express = express();
 app.use(express.json());
 app.use(metricsMiddleware);
 
@@ -13,7 +13,7 @@ app.use("/weather", weatherRoutes);
 app.use("/", authRoutes);
 app.use("/", statusRoutes);
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("");
 });
 

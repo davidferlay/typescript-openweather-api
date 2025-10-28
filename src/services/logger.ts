@@ -15,8 +15,8 @@ class Logger {
   }
 
   private formatMessage(level: string, message: string, meta?: unknown): string {
-    const timestamp = new Date().toISOString();
-    const metaStr = meta ? ` ${JSON.stringify(meta)}` : "";
+    const timestamp: string = new Date().toISOString();
+    const metaStr: string = meta ? ` ${JSON.stringify(meta)}` : "";
     return `[${timestamp}] ${level}: ${message}${metaStr}`;
   }
 
@@ -45,4 +45,4 @@ class Logger {
   }
 }
 
-export const logger = new Logger();
+export const logger: Logger = new Logger();

@@ -2,21 +2,24 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { logger } from "./logger.js";
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers['authorization'];
+export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const authHeader: string | undefined = req.headers['authorization'];
   if (!authHeader) {
     logger.warn("Request without authorization header", { path: req.path });
-    return res.status(401).json({ error: "No token" });
+    res.status(401).json({ error: "No token" });
+    return;
   }
-  const token = authHeader.split(" ")[1];
+  const token: string | undefined = authHeader.split(" ")[1];
   if (!token) {
     logger.warn("Request with invalid token format", { path: req.path });
-    return res.status(401).json({ error: "Invalid token format" });
+    res.status(401).json({ error: "Invalid token format" });
+    return;
   }
-  const secret = process.env.JWT_SECRET;
+  const secret: string | undefined = process.env["JWT_SECRET"];
   if (!secret) {
     logger.error("JWT_SECRET not configured in auth middleware");
-    return res.status(500).json({ error: "Server configuration error" });
+    res.status(500).json({ error: "Server configuration error" });
+    return;
   }
   try {
     req.user = jwt.verify(token, secret);

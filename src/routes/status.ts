@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 import { config } from "../config.js";
 import { metrics } from "../services/metrics.js";
 
-const router = Router();
+const router: Router = Router();
 
 function getGitCommitSha(): string {
   try {
@@ -13,7 +13,7 @@ function getGitCommitSha(): string {
   }
 }
 
-router.get("/status", (req, res) => {
+router.get("/status", (_req, res) => {
   res.json({
     config: {
       cacheTTL: config.weather.cacheTTL,
@@ -25,7 +25,7 @@ router.get("/status", (req, res) => {
   });
 });
 
-router.get("/metrics", (req, res) => {
+router.get("/metrics", (_req, res) => {
   res.json(metrics.getMetrics());
 });
 

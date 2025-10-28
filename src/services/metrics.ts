@@ -7,20 +7,42 @@ interface EndpointStats {
   maxDuration: number;
 }
 
-class MetricsCollector {
-  private requestCount = 0;
-  private endpointStats: Map<string, EndpointStats> = new Map();
-  private cacheHits = 0;
-  private cacheMisses = 0;
-  private errors: Map<number, number> = new Map();
-  private startTime = Date.now();
+interface MetricsResponse {
+  uptimeSeconds: number;
+  requests: {
+    total: number;
+  };
+  endpoints: Record<string, {
+    count: number;
+    avgDurationMs: number;
+    minDurationMs: number;
+    maxDurationMs: number;
+  }>;
+  cache: {
+    hits: number;
+    misses: number;
+    hitRate: number;
+  };
+  errors: {
+    total: number;
+    byStatusCode: Record<number, number>;
+  };
+}
 
-  trackRequest(method: string, path: string, statusCode: number, duration: number) {
+class MetricsCollector {
+  private requestCount: number = 0;
+  private endpointStats: Map<string, EndpointStats> = new Map();
+  private cacheHits: number = 0;
+  private cacheMisses: number = 0;
+  private errors: Map<number, number> = new Map();
+  private startTime: number = Date.now();
+
+  trackRequest(method: string, path: string, statusCode: number, duration: number): void {
     this.requestCount++;
 
     // Update endpoint stats
-    const endpoint = `${method} ${path}`;
-    const stats = this.endpointStats.get(endpoint) || {
+    const endpoint: string = `${method} ${path}`;
+    const stats: EndpointStats = this.endpointStats.get(endpoint) || {
       count: 0,
       totalDuration: 0,
       minDuration: Infinity,
@@ -40,17 +62,17 @@ class MetricsCollector {
     }
   }
 
-  trackCacheHit() {
+  trackCacheHit(): void {
     this.cacheHits++;
   }
 
-  trackCacheMiss() {
+  trackCacheMiss(): void {
     this.cacheMisses++;
   }
 
   // Get all metrics
-  getMetrics() {
-    const uptimeSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+  getMetrics(): MetricsResponse {
+    const uptimeSeconds: number = Math.floor((Date.now() - this.startTime) / 1000);
 
     // Endpoint-specific stats
     const endpoints: Record<string, {
@@ -69,8 +91,8 @@ class MetricsCollector {
     });
 
     // Cache stats
-    const totalCacheOps = this.cacheHits + this.cacheMisses;
-    const cacheHitRate = totalCacheOps > 0 ? (this.cacheHits / totalCacheOps) * 100 : 0;
+    const totalCacheOps: number = this.cacheHits + this.cacheMisses;
+    const cacheHitRate: number = totalCacheOps > 0 ? (this.cacheHits / totalCacheOps) * 100 : 0;
 
     // Error stats
     const errorsByCode: Record<number, number> = {};
@@ -98,15 +120,15 @@ class MetricsCollector {
 }
 
 // Singleton instance
-export const metrics = new MetricsCollector();
+export const metrics: MetricsCollector = new MetricsCollector();
 
 // Express middleware for tracking request metrics
-export function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
-  const startTime = Date.now();
+export function metricsMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const startTime: number = Date.now();
 
   res.on("finish", () => {
-    const duration = Date.now() - startTime;
-    const path = req.route?.path || req.path;
+    const duration: number = Date.now() - startTime;
+    const path: string = req.route?.path || req.path;
     metrics.trackRequest(req.method, path, res.statusCode, duration);
   });
 

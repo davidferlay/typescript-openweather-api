@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 function getEnvVar(key: string, defaultValue?: string): string {
-  const value = process.env[key];
+  const value: string | undefined = process.env[key];
   if (!value && defaultValue === undefined) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
@@ -11,14 +11,29 @@ function getEnvVar(key: string, defaultValue?: string): string {
 }
 
 function getEnvNumber(key: string, defaultValue?: number): number {
-  const value = process.env[key];
+  const value: string | undefined = process.env[key];
   if (!value && defaultValue === undefined) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
   return value ? parseInt(value, 10) : defaultValue!;
 }
 
-export const config = {
+export const config: {
+  readonly server: {
+    readonly port: number;
+  };
+  readonly logging: {
+    readonly level: "ERROR" | "WARN" | "INFO" | "DEBUG";
+  };
+  readonly weather: {
+    readonly units: "metric" | "imperial" | "standard";
+    readonly cacheTTL: number;
+  };
+  readonly auth: {
+    readonly username: string | undefined;
+    readonly password: string | undefined;
+  };
+} = {
   server: {
     port: getEnvNumber("PORT", 3000),
   },
@@ -31,7 +46,7 @@ export const config = {
   },
   // TODO: upgrade in favor of real user registration workflow
   auth: {
-    username: process.env.E2E_AUTH_USERNAME,
-    password: process.env.E2E_AUTH_PASSWORD,
+    username: process.env["E2E_AUTH_USERNAME"],
+    password: process.env["E2E_AUTH_PASSWORD"],
   },
 } as const;

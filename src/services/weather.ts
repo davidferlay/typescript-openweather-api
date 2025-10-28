@@ -4,8 +4,14 @@ import { config } from "../config.js";
 import { metrics } from "./metrics.js";
 import { logger } from "./logger.js";
 
-export async function getWeather(city: string) {
-  const cached = getCachedWeather(city);
+interface WeatherData {
+  city: string;
+  weather: string;
+  temperature: number;
+}
+
+export async function getWeather(city: string): Promise<{ data: unknown; fromCache: boolean }> {
+  const cached: unknown = getCachedWeather(city);
   if (cached) {
     logger.debug("Cache hit for weather data", { city });
     metrics.trackCacheHit();
@@ -14,16 +20,16 @@ export async function getWeather(city: string) {
   logger.info("Fetching weather data from API", { city });
   metrics.trackCacheMiss();
 
-  const apiKey = process.env.OWM_API_KEY;
+  const apiKey: string | undefined = process.env["OWM_API_KEY"];
   if (!apiKey) {
     logger.error("OWM_API_KEY not configured");
     throw new Error("Missing required environment variable: OWM_API_KEY");
   }
 
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${config.weather.units}`;
-    const response = await axios.get(url);
-    const weather = {
+    const url: string = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${config.weather.units}`;
+    const response: { data: { name: string; weather: [{ main: string }]; main: { temp: number } } } = await axios.get(url);
+    const weather: WeatherData = {
       city: response.data.name,
       weather: response.data.weather[0].main,
       temperature: response.data.main.temp,
