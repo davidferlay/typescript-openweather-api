@@ -18,14 +18,16 @@ jobs:
         node-version: 22.x
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm clean-install
-
     - name: Cache node_modules
-      uses: actions/cache/save@v4
+      id: cache-node-modules
+      uses: actions/cache@v4
       with:
         path: node_modules
         key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm clean-install
 
   Lint:
     runs-on: ubuntu-latest
