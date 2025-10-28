@@ -15,7 +15,8 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config e2e/jest.config.js",
-    "all": "npm run lint && npm run test && npm run test:coverage && npm run audit && npm run test:e2e"
+    "check:unused": "node scripts/check-unused-code.js",
+    "all": "npm run lint && npm run test && npm run test:coverage && npm run audit && npm run test:e2e && npm run check:unused"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^9.38.0",
+    "groq-sdk": "^0.34.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "ts-jest": "^29.4.5",
