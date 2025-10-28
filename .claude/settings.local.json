@@ -21,7 +21,8 @@
       "Bash(npm run test:coverage:*)",
       "Bash(npm run lint:*)",
       "Bash(npm audit:*)",
-      "Bash(npm run lint:fix:*)"
+      "Bash(npm run lint:fix:*)",
+      "Bash(npm run audit:*)"
     ],
     "deny": [],
     "ask": []
