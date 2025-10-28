@@ -181,130 +181,28 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-    - name: Run end-to-end tests
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm clean-install
+
+    - name: Run E2E tests
       env:
-        RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
+        E2E_BASE_URL: ${{ secrets.RENDER_APP_URL }}
         E2E_AUTH_USERNAME: ${{ secrets.E2E_AUTH_USERNAME }}
         E2E_AUTH_PASSWORD: ${{ secrets.E2E_AUTH_PASSWORD }}
-      run: |
-        echo "Running E2E tests against deployed app..."
-        FAILED=0
-
-        # Test 1: Status endpoint
-        echo "→ Testing /status endpoint..."
-        STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" "${RENDER_APP_URL}/status")
-        STATUS_CODE=$(echo "$STATUS_RESPONSE" | tail -n 1)
-        STATUS_BODY=$(echo "$STATUS_RESPONSE" | head -n -1)
-
-        if [ "$STATUS_CODE" -ne 200 ]; then
-          echo "✗ /status returned status code $STATUS_CODE (expected 200)"
-          FAILED=1
-        else
-          COMMIT=$(echo "$STATUS_BODY" | jq -r '.git.commit // empty')
-          CACHE_TTL=$(echo "$STATUS_BODY" | jq -r '.config.cacheTTL // empty')
-
-          if [ -z "$COMMIT" ] || [ -z "$CACHE_TTL" ]; then
-            echo "✗ /status response missing expected fields"
-            echo "Response: $STATUS_BODY"
-            FAILED=1
-          else
-            echo "✓ /status endpoint working (commit: $COMMIT, cacheTTL: $CACHE_TTL)"
-          fi
-        fi
-
-        # Test 2: Metrics endpoint
-        echo "→ Testing /metrics endpoint..."
-        METRICS_RESPONSE=$(curl -s -w "\n%{http_code}" "${RENDER_APP_URL}/metrics")
-        METRICS_CODE=$(echo "$METRICS_RESPONSE" | tail -n 1)
-        METRICS_BODY=$(echo "$METRICS_RESPONSE" | head -n -1)
-
-        if [ "$METRICS_CODE" -ne 200 ]; then
-          echo "✗ /metrics returned status code $METRICS_CODE (expected 200)"
-          FAILED=1
-        else
-          UPTIME=$(echo "$METRICS_BODY" | jq -r '.uptimeSeconds // empty')
-          TOTAL_REQUESTS=$(echo "$METRICS_BODY" | jq -r '.requests.total // empty')
-
-          if [ -z "$UPTIME" ]; then
-            echo "✗ /metrics response missing expected fields"
-            echo "Response: $METRICS_BODY"
-            FAILED=1
-          else
-            echo "✓ /metrics endpoint working (uptime: ${UPTIME}s, requests: $TOTAL_REQUESTS)"
-          fi
-        fi
-
-        # Test 3: Authentication endpoint
-        echo "→ Testing /get-token endpoint..."
-        TOKEN_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${RENDER_APP_URL}/get-token" \
-          -H "Content-Type: application/json" \
-          -d "{\"username\":\"${E2E_AUTH_USERNAME}\",\"password\":\"${E2E_AUTH_PASSWORD}\"}")
-        TOKEN_CODE=$(echo "$TOKEN_RESPONSE" | tail -n 1)
-        TOKEN_BODY=$(echo "$TOKEN_RESPONSE" | head -n -1)
-
-        if [ "$TOKEN_CODE" -ne 200 ]; then
-          echo "✗ /get-token returned status code $TOKEN_CODE (expected 200)"
-          echo "Response: $TOKEN_BODY"
-          FAILED=1
-        else
-          TOKEN=$(echo "$TOKEN_BODY" | jq -r '.token // empty')
-
-          if [ -z "$TOKEN" ]; then
-            echo "✗ /get-token response missing token"
-            echo "Response: $TOKEN_BODY"
-            FAILED=1
-          else
-            echo "✓ /get-token endpoint working (token received)"
-          fi
-        fi
-
-        # Test 4: Weather endpoint (requires auth)
-        if [ -n "$TOKEN" ]; then
-          echo "→ Testing /weather/london endpoint..."
-          WEATHER_RESPONSE=$(curl -s -w "\n%{http_code}" "${RENDER_APP_URL}/weather/london" \
-            -H "Authorization: Bearer $TOKEN")
-          WEATHER_CODE=$(echo "$WEATHER_RESPONSE" | tail -n 1)
-          WEATHER_BODY=$(echo "$WEATHER_RESPONSE" | head -n -1)
-
-          if [ "$WEATHER_CODE" -ne 200 ]; then
-            echo "✗ /weather/london returned status code $WEATHER_CODE (expected 200)"
-            echo "Response: $WEATHER_BODY"
-            FAILED=1
-          else
-            WEATHER_NAME=$(echo "$WEATHER_BODY" | jq -r '.name // empty')
-            TEMP=$(echo "$WEATHER_BODY" | jq -r '.main.temp // empty')
-
-            if [ -z "$WEATHER_NAME" ] || [ -z "$TEMP" ]; then
-              echo "✗ /weather/london response missing expected weather fields"
-              echo "Response: $WEATHER_BODY"
-              FAILED=1
-            else
-              echo "✓ /weather/london endpoint working (city: $WEATHER_NAME, temp: ${TEMP}°C)"
-            fi
-          fi
-        else
-          echo "⊘ Skipping weather endpoint test (no auth token)"
-          FAILED=1
-        fi
-
-        # Test 5: Weather endpoint without auth (should fail)
-        echo "→ Testing /weather/london without authentication..."
-        UNAUTH_RESPONSE=$(curl -s -w "\n%{http_code}" "${RENDER_APP_URL}/weather/london")
-        UNAUTH_CODE=$(echo "$UNAUTH_RESPONSE" | tail -n 1)
-
-        if [ "$UNAUTH_CODE" -eq 401 ]; then
-          echo "✓ /weather/london correctly rejects unauthenticated requests"
-        else
-          echo "✗ /weather/london returned status code $UNAUTH_CODE (expected 401)"
-          FAILED=1
-        fi
-
-        # Summary
-        echo ""
-        if [ $FAILED -eq 0 ]; then
-          echo "✓ All E2E tests passed!"
-          exit 0
-        else
-          echo "✗ Some E2E tests failed"
-          exit 1
-        fi
+      run: npm run test:e2e

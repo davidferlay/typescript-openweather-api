@@ -1,5 +1,5 @@
 import express from "express";
-import "./config.js"; // Load config/env vars
+import { config } from "./config.js";
 import weatherRoutes from "./routes/weather.js";
 import authRoutes from "./routes/auth.js";
 import statusRoutes from "./routes/status.js";
@@ -17,6 +17,5 @@ app.get("/", (req, res) => {
   res.send("");
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`API listening at port ${port}`));
+app.listen(config.server.port, () => console.log(`API listening at port ${config.server.port}`));
 
