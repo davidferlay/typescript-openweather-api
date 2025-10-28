@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { metrics } from "../services/metrics.js";
 
-export function requestLogger(req: Request, res: Response, next: NextFunction) {
+export function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
   const startTime = Date.now();
 
   res.on("finish", () => {
