@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { config } from "../config.js";
 import { logger } from "../services/logger.js";
 
-const TOKEN_EXPIRATION_TIME = "1h" as const;
+const TOKEN_EXPIRATION_TIME: "1h" = "1h";
 
 const router: Router = Router();
 

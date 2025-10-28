@@ -14,7 +14,8 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config e2e/jest.config.js"
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config e2e/jest.config.js",
+    "all": "npm run lint && npm run test && npm run test:coverage && npm run audit && npm run test:e2e"
   },
   "repository": {
     "type": "git",
