@@ -53,7 +53,12 @@ class MetricsCollector {
     const uptimeSeconds = Math.floor((Date.now() - this.startTime) / 1000);
 
     // Endpoint-specific stats
-    const endpoints: Record<string, any> = {};
+    const endpoints: Record<string, {
+      count: number;
+      avgDurationMs: number;
+      minDurationMs: number;
+      maxDurationMs: number;
+    }> = {};
     this.endpointStats.forEach((stats, endpoint) => {
       endpoints[endpoint] = {
         count: stats.count,
