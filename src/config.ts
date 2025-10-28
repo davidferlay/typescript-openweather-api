@@ -21,6 +21,11 @@ function getEnvNumber(key: string, defaultValue?: number): number {
 export const config = {
   weather: {
     units: getEnvVar("WEATHER_UNITS", "metric") as "metric" | "imperial" | "standard",
-    cacheTTL: getEnvNumber("CACHE_TTL_SECONDS", 600), // Default: 10 minutes
+    cacheTTL: getEnvNumber("CACHE_TTL_SECONDS", 600), // Default is 10 min
+  },
+  // TODO: remove hardcoded auth credentials
+  auth: {
+    hardcodedUsername: "indy",
+    hardcodedPassword: "password123",
   },
 } as const;
