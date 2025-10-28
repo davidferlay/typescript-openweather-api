@@ -40,25 +40,25 @@ class MetricsCollector {
   trackRequest(method: string, path: string, statusCode: number, duration: number): void {
     this.requestCount++;
 
-    // Update endpoint stats
-    const endpoint: string = `${method} ${path}`;
-    const stats: EndpointStats = this.endpointStats.get(endpoint) || {
+    const endpointKey: string = `${method} ${path}`;
+    const currentStats: EndpointStats = this.endpointStats.get(endpointKey) || {
       count: 0,
       totalDuration: 0,
       minDuration: Infinity,
       maxDuration: 0,
     };
 
-    stats.count++;
-    stats.totalDuration += duration;
-    stats.minDuration = Math.min(stats.minDuration, duration);
-    stats.maxDuration = Math.max(stats.maxDuration, duration);
+    currentStats.count++;
+    currentStats.totalDuration += duration;
+    currentStats.minDuration = Math.min(currentStats.minDuration, duration);
+    currentStats.maxDuration = Math.max(currentStats.maxDuration, duration);
 
-    this.endpointStats.set(endpoint, stats);
+    this.endpointStats.set(endpointKey, currentStats);
 
-    // Track errors
-    if (statusCode >= 400) {
-      this.errors.set(statusCode, (this.errors.get(statusCode) || 0) + 1);
+    const isError: boolean = statusCode >= 400;
+    if (isError) {
+      const currentErrorCount: number = this.errors.get(statusCode) || 0;
+      this.errors.set(statusCode, currentErrorCount + 1);
     }
   }
 
@@ -70,50 +70,56 @@ class MetricsCollector {
     this.cacheMisses++;
   }
 
-  // Get all metrics
   getMetrics(): MetricsResponse {
-    const uptimeSeconds: number = Math.floor((Date.now() - this.startTime) / 1000);
+    const currentTime: number = Date.now();
+    const uptimeSeconds: number = Math.floor((currentTime - this.startTime) / 1000);
 
-    // Endpoint-specific stats
-    const endpoints: Record<string, {
+    const endpointsData: Record<string, {
       count: number;
       avgDurationMs: number;
       minDurationMs: number;
       maxDurationMs: number;
     }> = {};
-    this.endpointStats.forEach((stats, endpoint) => {
-      endpoints[endpoint] = {
+
+    this.endpointStats.forEach((stats, endpointKey) => {
+      const avgDuration: number = Math.round(stats.totalDuration / stats.count);
+      const minDuration: number = stats.minDuration === Infinity ? 0 : stats.minDuration;
+
+      endpointsData[endpointKey] = {
         count: stats.count,
-        avgDurationMs: Math.round(stats.totalDuration / stats.count),
-        minDurationMs: stats.minDuration === Infinity ? 0 : stats.minDuration,
+        avgDurationMs: avgDuration,
+        minDurationMs: minDuration,
         maxDurationMs: stats.maxDuration,
       };
     });
 
-    // Cache stats
-    const totalCacheOps: number = this.cacheHits + this.cacheMisses;
-    const cacheHitRate: number = totalCacheOps > 0 ? (this.cacheHits / totalCacheOps) * 100 : 0;
+    const totalCacheOperations: number = this.cacheHits + this.cacheMisses;
+    const hasCacheOperations: boolean = totalCacheOperations > 0;
+    const cacheHitRate: number = hasCacheOperations ? (this.cacheHits / totalCacheOperations) * 100 : 0;
+    const roundedCacheHitRate: number = Math.round(cacheHitRate * 100) / 100;
 
-    // Error stats
-    const errorsByCode: Record<number, number> = {};
-    this.errors.forEach((count, code) => {
-      errorsByCode[code] = count;
+    const errorsByStatusCode: Record<number, number> = {};
+    this.errors.forEach((count, statusCode) => {
+      errorsByStatusCode[statusCode] = count;
     });
+
+    const errorCounts: number[] = Array.from(this.errors.values());
+    const totalErrors: number = errorCounts.reduce((sum, count) => sum + count, 0);
 
     return {
       uptimeSeconds: uptimeSeconds,
       requests: {
         total: this.requestCount,
       },
-      endpoints,
+      endpoints: endpointsData,
       cache: {
         hits: this.cacheHits,
         misses: this.cacheMisses,
-        hitRate: Math.round(cacheHitRate * 100) / 100,
+        hitRate: roundedCacheHitRate,
       },
       errors: {
-        total: Array.from(this.errors.values()).reduce((a, b) => a + b, 0),
-        byStatusCode: errorsByCode,
+        total: totalErrors,
+        byStatusCode: errorsByStatusCode,
       },
     };
   }

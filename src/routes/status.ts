@@ -7,26 +7,30 @@ const router: Router = Router();
 
 function getGitCommitSha(): string {
   try {
-    return execSync("git rev-parse --short HEAD").toString().trim();
+    const commitSha: string = execSync("git rev-parse --short HEAD").toString().trim();
+    return commitSha;
   } catch {
     return "unknown";
   }
 }
 
 router.get("/status", (_req, res) => {
+  const currentCommit: string = getGitCommitSha();
+
   res.json({
     config: {
       cacheTTL: config.weather.cacheTTL,
       units: config.weather.units,
     },
     git: {
-      commit: getGitCommitSha(),
+      commit: currentCommit,
     },
   });
 });
 
 router.get("/metrics", (_req, res) => {
-  res.json(metrics.getMetrics());
+  const currentMetrics: unknown = metrics.getMetrics();
+  res.json(currentMetrics);
 });
 
 export default router;

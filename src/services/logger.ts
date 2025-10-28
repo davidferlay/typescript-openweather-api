@@ -16,31 +16,40 @@ class Logger {
 
   private formatMessage(level: string, message: string, meta?: unknown): string {
     const timestamp: string = new Date().toISOString();
-    const metaStr: string = meta ? ` ${JSON.stringify(meta)}` : "";
-    return `[${timestamp}] ${level}: ${message}${metaStr}`;
+    const hasMetadata: boolean = Boolean(meta);
+    const metadataString: string = hasMetadata ? ` ${JSON.stringify(meta)}` : "";
+    return `[${timestamp}] ${level}: ${message}${metadataString}`;
   }
 
   error(message: string, meta?: unknown): void {
-    if (this.logLevel >= LogLevel.ERROR) {
-      console.error(this.formatMessage("ERROR", message, meta));
+    const shouldLog: boolean = this.logLevel >= LogLevel.ERROR;
+    if (shouldLog) {
+      const formattedMessage: string = this.formatMessage("ERROR", message, meta);
+      console.error(formattedMessage);
     }
   }
 
   warn(message: string, meta?: unknown): void {
-    if (this.logLevel >= LogLevel.WARN) {
-      console.warn(this.formatMessage("WARN", message, meta));
+    const shouldLog: boolean = this.logLevel >= LogLevel.WARN;
+    if (shouldLog) {
+      const formattedMessage: string = this.formatMessage("WARN", message, meta);
+      console.warn(formattedMessage);
     }
   }
 
   info(message: string, meta?: unknown): void {
-    if (this.logLevel >= LogLevel.INFO) {
-      console.log(this.formatMessage("INFO", message, meta));
+    const shouldLog: boolean = this.logLevel >= LogLevel.INFO;
+    if (shouldLog) {
+      const formattedMessage: string = this.formatMessage("INFO", message, meta);
+      console.log(formattedMessage);
     }
   }
 
   debug(message: string, meta?: unknown): void {
-    if (this.logLevel >= LogLevel.DEBUG) {
-      console.log(this.formatMessage("DEBUG", message, meta));
+    const shouldLog: boolean = this.logLevel >= LogLevel.DEBUG;
+    if (shouldLog) {
+      const formattedMessage: string = this.formatMessage("DEBUG", message, meta);
+      console.log(formattedMessage);
     }
   }
 }

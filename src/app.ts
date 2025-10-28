@@ -6,6 +6,7 @@ import statusRoutes from "./routes/status.js";
 import { metricsMiddleware } from "./services/metrics.js";
 
 const app: express.Express = express();
+
 app.use(express.json());
 app.use(metricsMiddleware);
 
@@ -17,5 +18,6 @@ app.get("/", (_req, res) => {
   res.send("");
 });
 
-app.listen(config.server.port, () => console.log(`API listening at port ${config.server.port}`));
+const serverPort: number = config.server.port;
+app.listen(serverPort, () => console.log(`API listening at port ${serverPort}`));
 
