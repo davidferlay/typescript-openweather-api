@@ -1,3 +1,5 @@
+import { config } from "../config.js";
+
 enum LogLevel {
   ERROR = 0,
   WARN = 1,
@@ -9,8 +11,7 @@ class Logger {
   private logLevel: LogLevel;
 
   constructor() {
-    const envLevel = process.env.LOG_LEVEL?.toUpperCase();
-    this.logLevel = LogLevel[envLevel as keyof typeof LogLevel] ?? LogLevel.INFO;
+    this.logLevel = LogLevel[config.logging.level as keyof typeof LogLevel];
   }
 
   private formatMessage(level: string, message: string, meta?: unknown): string {

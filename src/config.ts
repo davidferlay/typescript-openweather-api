@@ -22,6 +22,9 @@ export const config = {
   server: {
     port: getEnvNumber("PORT", 3000),
   },
+  logging: {
+    level: getEnvVar("LOG_LEVEL", "WARN").toUpperCase() as "ERROR" | "WARN" | "INFO" | "DEBUG",
+  },
   weather: {
     units: getEnvVar("WEATHER_UNITS", "metric") as "metric" | "imperial" | "standard",
     cacheTTL: getEnvNumber("CACHE_TTL_SECONDS", 600), // Default is 10 min

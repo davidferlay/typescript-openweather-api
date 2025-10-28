@@ -37,7 +37,10 @@ describe('Logger', () => {
     );
   });
 
-  it('should log info messages', async () => {
+  it('should log info messages when LOG_LEVEL=INFO', async () => {
+    process.env.LOG_LEVEL = 'INFO';
+    jest.resetModules();
+
     const { logger } = await import('./logger.js');
     logger.info('Test info');
 
@@ -48,12 +51,9 @@ describe('Logger', () => {
 
   it('should log debug messages when LOG_LEVEL=DEBUG', async () => {
     process.env.LOG_LEVEL = 'DEBUG';
+    jest.resetModules();
 
-    // Re-import with new env variable
-    const loggerPath = './logger.js';
-    delete (await import('module')).default._cache[loggerPath];
-    const { logger } = await import(`${loggerPath}?t=${Date.now()}`);
-
+    const { logger } = await import('./logger.js');
     logger.debug('Test debug');
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
