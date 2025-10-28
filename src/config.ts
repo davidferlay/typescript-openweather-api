@@ -23,9 +23,9 @@ export const config = {
     units: getEnvVar("WEATHER_UNITS", "metric") as "metric" | "imperial" | "standard",
     cacheTTL: getEnvNumber("CACHE_TTL_SECONDS", 600), // Default is 10 min
   },
-  // TODO: remove hardcoded auth credentials
+  // TODO: upgrade in favor of real user registration workflow
   auth: {
-    hardcodedUsername: "indy",
-    hardcodedPassword: "password123",
+    username: process.env.E2E_AUTH_USERNAME,
+    password: process.env.E2E_AUTH_PASSWORD,
   },
 } as const;

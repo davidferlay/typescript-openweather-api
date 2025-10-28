@@ -9,13 +9,19 @@ const router = Router();
 router.post("/get-token", (req, res) => {
   const { username, password } = req.body || {};
 
+  // Check if authentication is configured
+  if (!config.auth.username || !config.auth.password) {
+    logger.error("Authentication not configured - E2E_AUTH_USERNAME and E2E_AUTH_PASSWORD must be set");
+    return res.status(503).json({ error: "Authentication service not available" });
+  }
+
   // Validate credentials
   if (!username || !password) {
     logger.warn("Authentication attempt with missing credentials");
     return res.status(400).json({ error: "Username and password are required" });
   }
 
-  if (username !== config.auth.hardcodedUsername || password !== config.auth.hardcodedPassword) {
+  if (username !== config.auth.username || password !== config.auth.password) {
     logger.warn("Failed authentication attempt", { username });
     return res.status(401).json({ error: "Invalid credentials" });
   }
