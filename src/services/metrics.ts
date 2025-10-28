@@ -88,15 +88,6 @@ class MetricsCollector {
       },
     };
   }
-
-  reset() {
-    this.requestCount = 0;
-    this.endpointStats.clear();
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
-    this.errors.clear();
-    this.startTime = Date.now();
-  }
 }
 
 // Singleton instance
