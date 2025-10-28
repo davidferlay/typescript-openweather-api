@@ -141,29 +141,41 @@ jobs:
         EXPECTED_SHA: ${{ steps.get-sha.outputs.sha }}
         RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
       run: |
-        echo "Waiting for Render deployment to complete..."
+        echo "Waiting for Render deployment to complete... (It usually takes 30-60 sec)"
+        echo "Expected commit SHA: $EXPECTED_SHA"
+
         MAX_ATTEMPTS=30
         SLEEP_TIME=10
 
         for i in $(seq 1 $MAX_ATTEMPTS); do
+          echo ""
           echo "Attempt $i of $MAX_ATTEMPTS..."
 
-          # Get status from deployed app
-          RESPONSE=$(curl -s "${RENDER_APP_URL}/status" || echo "")
+          # Get status from deployed app with timeout
+          HTTP_CODE=$(curl -s -o /tmp/response.json -w "%{http_code}" --max-time 10 "${RENDER_APP_URL}/status" || echo "000")
 
-          if [ -n "$RESPONSE" ]; then
-            DEPLOYED_SHA=$(echo "$RESPONSE" | jq -r '.git.commit // "unknown"')
-            echo "Deployed commit SHA: $DEPLOYED_SHA"
+          if [ "$HTTP_CODE" = "200" ]; then
+            # Check if response is valid JSON
+            if jq empty /tmp/response.json 2>/dev/null; then
+              DEPLOYED_SHA=$(jq -r '.git.commit // "unknown"' /tmp/response.json)
+              echo "Deployed commit SHA: $DEPLOYED_SHA"
 
-            if [ "$DEPLOYED_SHA" = "$EXPECTED_SHA" ]; then
-              echo "✓ Deployment verified successfully!"
-              echo "Deployed SHA matches expected SHA: $EXPECTED_SHA"
-              exit 0
+              if [ "$DEPLOYED_SHA" = "$EXPECTED_SHA" ]; then
+                echo "✓ Deployment verified successfully!"
+                echo "Deployed SHA matches expected SHA: $EXPECTED_SHA"
+                exit 0
+              elif [ "$DEPLOYED_SHA" = "unknown" ]; then
+                echo "Response missing commit SHA"
+              else
+                echo "SHA mismatch. Expected: $EXPECTED_SHA, Got: $DEPLOYED_SHA"
+              fi
             else
-              echo "SHA mismatch. Expected: $EXPECTED_SHA, Got: $DEPLOYED_SHA"
+              echo "Response is not valid JSON"
             fi
+          elif [ "$HTTP_CODE" = "000" ]; then
+            echo "Request timeout or connection failed"
           else
-            echo "Could not reach app or invalid response"
+            echo "HTTP $HTTP_CODE - App not ready yet"
           fi
 
           if [ $i -lt $MAX_ATTEMPTS ]; then
@@ -172,6 +184,7 @@ jobs:
           fi
         done
 
+        echo ""
         echo "✗ Deployment verification failed after $MAX_ATTEMPTS attempts"
         exit 1
 
