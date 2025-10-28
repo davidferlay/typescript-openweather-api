@@ -13,7 +13,9 @@
       "Bash(npm run start)",
       "Bash(timeout 3 npm run start:*)",
       "Bash(python3:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []
