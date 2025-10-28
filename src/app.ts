@@ -3,7 +3,7 @@ import "./config.js"; // Load config/env vars
 import weatherRoutes from "./routes/weather.js";
 import authRoutes from "./routes/auth.js";
 import statusRoutes from "./routes/status.js";
-import { metricsMiddleware } from "./middlewares/metricsMiddleware.js";
+import { metricsMiddleware } from "./services/metrics.js";
 
 const app = express();
 app.use(express.json());

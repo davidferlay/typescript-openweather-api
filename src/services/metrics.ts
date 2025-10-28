@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from "express";
+
 interface EndpointStats {
   count: number;
   totalDuration: number;
@@ -92,3 +94,16 @@ class MetricsCollector {
 
 // Singleton instance
 export const metrics = new MetricsCollector();
+
+// Express middleware for tracking request metrics
+export function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
+  const startTime = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - startTime;
+    const path = req.route?.path || req.path;
+    metrics.trackRequest(req.method, path, res.statusCode, duration);
+  });
+
+  next();
+}
