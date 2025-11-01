@@ -74,6 +74,7 @@ describe('Metrics', () => {
       const mockRequest = {
         method: 'POST',
         path: '/api/test',
+        baseUrl: '',
         route: { path: '/api/test' }
       } as Partial<Request>;
 
@@ -86,6 +87,38 @@ describe('Metrics', () => {
 
               const metricsData = metrics.getMetrics();
               const endpoint = metricsData.endpoints['POST /api/test'];
+              expect(endpoint).toBeDefined();
+              expect(endpoint.count).toBeGreaterThan(0);
+              done();
+            }, 0);
+          }
+        })
+      } as Partial<Response>;
+
+      const mockNext = jest.fn() as jest.MockedFunction<NextFunction>;
+
+      metricsMiddleware(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it('should track mounted routes with baseUrl and route path', (done) => {
+      const mockRequest = {
+        method: 'GET',
+        path: '/weather/Paris',
+        baseUrl: '/weather',
+        route: { path: '/:city' }
+      } as Partial<Request>;
+
+      const mockResponse = {
+        statusCode: 200,
+        on: jest.fn((event: string, callback: () => void) => {
+          if (event === 'finish') {
+            setTimeout(() => {
+              callback();
+
+              const metricsData = metrics.getMetrics();
+              const endpoint = metricsData.endpoints['GET /weather/:city'];
               expect(endpoint).toBeDefined();
               expect(endpoint.count).toBeGreaterThan(0);
               done();

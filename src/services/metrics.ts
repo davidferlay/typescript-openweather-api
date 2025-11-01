@@ -134,7 +134,7 @@ export function metricsMiddleware(req: Request, res: Response, next: NextFunctio
 
   res.on("finish", () => {
     const duration: number = Date.now() - startTime;
-    const path: string = req.route?.path || req.path;
+    const path: string = req.route ? req.baseUrl + req.route.path : req.path;
     metrics.trackRequest(req.method, path, res.statusCode, duration);
   });
 
