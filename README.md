@@ -336,12 +336,12 @@ npm run dev
 ```
 - Run tests individually:
 ```shell
-npm run lint                 # ESLint
-npm run audit                # Dependency analysys
-npm run test                 # Unit-testing
-npm run test:coverage        # Unit-testing coverage validation
-npm run test:e2e             # e2e integration/functional business-logic testing
-npm run check:unused         # Identify unused/dead code using LLM-based analysis (via GROQ API)
+npm run lint               # ESLint
+npm run audit              # Dependency analysys
+npm run test               # Unit-testing
+npm run test:coverage      # Unit-testing coverage validation
+npm run test:e2e           # e2e integration/functional business-logic testing
+npm run check:unused       # Identify unused/dead code using LLM-based analysis (via GROQ API)
 ```
 > `test:e2e` requires `E2E_AUTH_USERNAME` and `E2E_AUTH_PASSWORD` values to be present in `.env` file
 > `check:unused` requires `GROQ_API_KEY` value to be present in `.env` file
@@ -355,6 +355,8 @@ URL="http://localhost:3000" TOKEN=$(curl -s -X POST ${URL}/get-token -H "Content
 ```
 
 
-## Wakeup Cronjob
+## Wake-up Cronjob
 
-Todo: Maybe add a wakeup Cronjob CI job to continiously wake up Render app during a specific period of time
+- Render's free tier apps automatically sleep after 15 minutes of inactivity, causing cold starts with ~30 second delays on first requests
+- For convience, a cron-like Github Action job will keep Render app awaken during office hours for weeks 44, 45 and 46
+

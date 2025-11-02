@@ -1,0 +1,42 @@
+name: Wakeup Cronjob
+
+on:
+  schedule:
+    - cron: '*/14 10-19 * * 1-5' # Every 14 minutes, 10am-7pm, weekdays only
+  workflow_dispatch:             # Allow manual trigger for testing
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check if current week is in allowed range
+      id: check-week
+      run: |
+        WEEK_NUM=$(date +%V)
+        YEAR=$(date +%Y)
+
+        echo "Current week: $WEEK_NUM, Year: $YEAR"
+
+        # Only run during weeks 44, 45, 46 of 2025
+        if [[ $YEAR -eq 2025 ]] && [[ $WEEK_NUM -ge 44 && $WEEK_NUM -le 46 ]]; then
+          echo "allowed=true" >> $GITHUB_OUTPUT
+          echo "✓ Week $WEEK_NUM of 2025 is in allowed range (44-46)"
+        else
+          echo "allowed=false" >> $GITHUB_OUTPUT
+          echo "✗ Skipping: Week $WEEK_NUM of $YEAR is outside allowed range (weeks 44-46 of 2025)"
+        fi
+
+    - name: Wake up Render app
+      if: steps.check-week.outputs.allowed == 'true'
+      env:
+        RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
+      run: |
+        echo "Pinging application at: $RENDER_APP_URL"
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${RENDER_APP_URL}/status")
+
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "✓ Application is awake (HTTP $HTTP_CODE)"
+        else
+          echo "⚠ Application returned HTTP $HTTP_CODE"
+        fi
