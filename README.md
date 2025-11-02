@@ -208,7 +208,7 @@ Metrics could be further improved and be fed to dedicated third-party tools:
 - Authentication: JWT-based token authentication, very common in APIs
    - Leveraging envvironement variables for a scoped implementation
 - Caching: node-cache (in-memory), relevant strategy and TTL for displaying weather data that changes regularly but not so much
-- Testing: Jest for unit and e2e, ESLint, npm audit, LLM-based dead code detection ([see it in action here](https://asciinema.org/a/y1AolXuIhr3mltIQP0TbWC33r))
+- Testing: Jest for unit and e2e, ESLint, npm audit, LLM-based dead code detection
 - Development: tsx with Hot reload + .env file for quick overrides
 - PAAS: Render.com for future evolutivity (ability to add database services and otherwise) + webhook deploy triggers
 
@@ -355,7 +355,7 @@ URL="http://localhost:3000" TOKEN=$(curl -s -X POST ${URL}/get-token -H "Content
 ```
 
 
-## Wake-up Cronjob
+## Wakeup Cronjob
 
 - Render's free tier apps automatically sleep after 15 minutes of inactivity, causing cold starts with ~30 second delays on first requests
 - For convience, a cron-like Github Action job will keep Render app awaken during office hours for weeks 44, 45 and 46
